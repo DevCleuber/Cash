@@ -8,8 +8,8 @@ let tipoAtual = 'renda';
 let iconeSelecionado = null;
 
 // ÍCONES SEPARADOS POR TIPO
-const iconesRendas = ['💰', '💳', '🏦', '💼', '👨‍💼', '👩‍💼', '🏠', '⚡', '💧', '📱', '✈️', '📚', '🚗', '🎓', '💡', '🏆', '⭐', '🎯', '📈', '💵', '💎', '🏅'];
-const iconesGastos = ['💸', '🛒', '🍔', '🏥', '🎬', '🎮', '🍽️', '🛍️', '✂️', '🔧', '🚌', '⛽', '💊', '📺', '🎵', '🎨', '⚽', '🎭', '🧹', '🧴', '💈', '🎁'];
+const iconesRendas = ['💰', '💳', '🏦', '💼', '👨‍💼', '👩‍💼', '🏠',  '🚗', '🎓', '💡', '🏆', '⭐', '🎯', '📈', '💵', '💎', '🏅'];
+const iconesGastos = ['💸', '🛒', '🍔', '🏥', '🎬', '🎮', '🍽️', '🛍️', '✂️', '🔧', '⚡', '💧', '📱', '✈️', '📚','🚌', '⛽', '💊', '📺', '🎵', '🎨', '⚽', '🎭', '🧹', '🧴', '💈', '🎁'];
 const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
 // ─── CHAVE DO MÊS ATUAL ────────────────────────────────────────────────────
