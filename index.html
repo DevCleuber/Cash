@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>Cashly</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f7;
+            color: #333;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* TORNAR TUDO CLICÁVEL */
+        button, [onclick] {
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            min-height: 44px;
+        }
+        
+        /* SCROLL PERSONALIZADO */
+        .scrollable {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* OCULTAR SCROLLBAR MAS PERMITIR SCROLL */
+        .scrollable::-webkit-scrollbar {
+            display: none;
+        }
+        
+        /* TELAS FIXAS */
+        .tela {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            background: #f5f5f7;
+        }
+        
+        /* CONTEÚDO SCROLLÁVEL */
+        .conteudo-scroll {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 60px; /* Espaço para o menu fixo */
+        }
+        
+        /* MENU FIXO */
+        .menu-fixo {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <!-- TELA PRINCIPAL -->
+    <div id="telaPrincipal" class="tela" style="display: flex;">
+        <div style="display: flex; flex-direction: column; height: 100%; width: 100%; max-width: 500px; margin: 0 auto;">
+            <!-- CABEÇALHO -->
+            <div style="background: white; padding: 15px; text-align: center; border-bottom: 1px solid #e0e0e0;">
+                <h1 style="color: #8a2be2; font-size: 22px; margin-bottom: 10px;">Cashly</h1>
+                <div style="margin: 10px 0;">
+                    <div style="color: #666; font-size: 13px;">Saldo:</div>
+                    <div id="saldoTotal" style="font-size: 28px; font-weight: bold;">R$ 0,00</div>
+                </div>
+                <button id="btnMes" style="background: #f0f0f0; border: none; padding: 8px 16px; border-radius: 20px; font-size: 14px; color: #555; margin-top: 5px;">
+                    Janeiro 2026 ▼
+                </button>
+            </div>
+
+            <!-- RESUMO -->
+            <div style="display: flex; gap: 10px; padding: 15px;">
+                <div style="flex: 1; background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    <div style="color: #666; font-size: 12px; margin-bottom: 5px;">Rendas</div>
+                    <div id="totalRendas" style="color: #34c759; font-size: 18px; font-weight: bold;">R$ 0,00</div>
+                </div>
+                <div style="flex: 1; background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    <div style="color: #666; font-size: 12px; margin-bottom: 5px;">Gastos</div>
+                    <div id="totalGastos" style="color: #ff3b30; font-size: 18px; font-weight: bold;">R$ 0,00</div>
+                </div>
+            </div>
+
+            <!-- BOTÕES PRINCIPAIS -->
+            <div style="display: flex; gap: 10px; padding: 0 15px 15px;">
+                <button id="btnRendas" style="flex: 1; background: white; border: 1px solid #e0e0e0; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    <span style="font-size: 22px; margin-bottom: 5px;">📥</span>
+                    <span style="font-size: 15px; font-weight: bold; margin-bottom: 2px;">Rendas</span>
+                    <span style="color: #666; font-size: 11px;">Ver/Adicionar</span>
+                </button>
+                
+                <button id="btnGastos" style="flex: 1; background: white; border: 1px solid #e0e0e0; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    <span style="font-size: 22px; margin-bottom: 5px;">📤</span>
+                    <span style="font-size: 15px; font-weight: bold; margin-bottom: 2px;">Gastos</span>
+                    <span style="color: #666; font-size: 11px;">Ver/Adicionar</span>
+                </button>
+            </div>
+
+            <!-- ÚLTIMAS TRANSAÇÕES (COM SCROLL DENTRO) -->
+            <div class="conteudo-scroll">
+                <div style="background: white; margin: 0 15px 15px; padding: 15px; border-radius: 12px; border: 1px solid #e0e0e0;">
+                    <div style="font-size: 15px; font-weight: bold; margin-bottom: 10px;">Últimas Adicionadas</div>
+                    <div id="ultimasLista" style="min-height: 100px;">
+                        <div style="text-align: center; padding: 20px; color: #999;">
+                            Nenhuma transação adicionada
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MENU FIXO NO FINAL (FORA DO CONTEÚDO SCROLL) -->
+        <div class="menu-fixo">
+            <button id="btnMenuInicio" style="flex: 1; display: flex; flex-direction: column; align-items: center; background: none; border: none; color: #8a2be2; font-weight: bold; padding: 8px; font-size: 11px;">
+                <span style="font-size: 18px;">🏠</span>
+                <span>Início</span>
+            </button>
+            <button id="btnMenuResumo" style="flex: 1; display: flex; flex-direction: column; align-items: center; background: none; border: none; color: #666; padding: 8px; font-size: 11px;">
+                <span style="font-size: 18px;">📊</span>
+                <span>Resumo</span>
+            </button>
+            <button id="btnMenuAjustes" style="flex: 1; display: flex; flex-direction: column; align-items: center; background: none; border: none; color: #666; padding: 8px; font-size: 11px;">
+                <span style="font-size: 18px;">⚙️</span>
+                <span>Ajustes</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- TELA RENDAS -->
+    <div id="telaRendas" class="tela">
+        <div style="display: flex; flex-direction: column; height: 100%; width: 100%; max-width: 500px; margin: 0 auto;">
+            <div style="background: white; padding: 15px; display: flex; align-items: center; border-bottom: 1px solid #e0e0e0;">
+                <button id="btnVoltarRendas" style="background: none; border: none; font-size: 16px; color: #8a2be2; min-width: 70px;">← Voltar</button>
+                <div style="flex: 1; text-align: center; font-size: 17px; font-weight: bold; color: #8a2be2;">📥 Rendas</div>
+                <button id="btnAddRenda" style="background: #8a2be2; color: white; border: none; padding: 8px 15px; border-radius: 8px; min-width: 70px; font-size: 14px;">+ Nova</button>
+            </div>
+            <div id="listaRendas" class="conteudo-scroll" style="padding: 15px;"></div>
+        </div>
+        <div class="menu-fixo" style="background: #f5f5f7;">
+            <div style="flex: 1; padding: 8px;"></div>
+            <div style="flex: 1; padding: 8px;"></div>
+            <div style="flex: 1; padding: 8px;"></div>
+        </div>
+    </div>
+
+    <!-- TELA GASTOS -->
+    <div id="telaGastos" class="tela">
+        <div style="display: flex; flex-direction: column; height: 100%; width: 100%; max-width: 500px; margin: 0 auto;">
+            <div style="background: white; padding: 15px; display: flex; align-items: center; border-bottom: 1px solid #e0e0e0;">
+                <button id="btnVoltarGastos" style="background: none; border: none; font-size: 16px; color: #8a2be2; min-width: 70px;">← Voltar</button>
+                <div style="flex: 1; text-align: center; font-size: 17px; font-weight: bold; color: #8a2be2;">📤 Gastos</div>
+                <button id="btnAddGasto" style="background: #8a2be2; color: white; border: none; padding: 8px 15px; border-radius: 8px; min-width: 70px; font-size: 14px;">+ Nova</button>
+            </div>
+            <div id="listaGastos" class="conteudo-scroll" style="padding: 15px;"></div>
+        </div>
+        <div class="menu-fixo" style="background: #f5f5f7;">
+            <div style="flex: 1; padding: 8px;"></div>
+            <div style="flex: 1; padding: 8px;"></div>
+            <div style="flex: 1; padding: 8px;"></div>
+        </div>
+    </div>
+
+    <!-- TELA RESUMO -->
+    <div id="telaResumo" class="tela">
+        <div style="display: flex; flex-direction: column; height: 100%; width: 100%; max-width: 500px; margin: 0 auto;">
+            <div style="background: white; padding: 15px; display: flex; align-items: center; border-bottom: 1px solid #e0e0e0;">
+                <button id="btnVoltarResumo" style="background: none; border: none; font-size: 16px; color: #8a2be2; min-width: 70px;">← Voltar</button>
+                <div style="flex: 1; text-align: center; font-size: 17px; font-weight: bold; color: #8a2be2;">📊 Resumo</div>
+            </div>
+            <div class="conteudo-scroll" style="padding: 15px;">
+                <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    <div style="font-size: 17px; font-weight: bold; margin-bottom: 15px; color: #8a2be2;">Resumo Financeiro</div>
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0; font-size: 15px;">
+                            <span>Total de Rendas:</span>
+                            <span id="resumoRendas" style="color: #34c759; font-weight: bold;">R$ 0,00</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0; font-size: 15px;">
+                            <span>Total de Gastos:</span>
+                            <span id="resumoGastos" style="color: #ff3b30; font-weight: bold;">R$ 0,00</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 15px 0; font-size: 17px; font-weight: bold;">
+                            <span>Saldo Final:</span>
+                            <span id="resumoSaldo">R$ 0,00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="menu-fixo" style="background: #f5f5f7;">
+            <div style="flex: 1; padding: 8px;"></div>
+            <div style="flex: 1; padding: 8px;"></div>
+            <div style="flex: 1; padding: 8px;"></div>
+        </div>
+    </div>
+
+    <!-- TELA AJUSTES -->
+    <div id="telaAjustes" class="tela">
+        <div style="display: flex; flex-direction: column; height: 100%; width: 100%; max-width: 500px; margin: 0 auto;">
+            <div style="background: white; padding: 15px; display: flex; align-items: center; border-bottom: 1px solid #e0e0e0;">
+                <button id="btnVoltarAjustes" style="background: none; border: none; font-size: 16px; color: #8a2be2; min-width: 70px;">← Voltar</button>
+                <div style="flex: 1; text-align: center; font-size: 17px; font-weight: bold; color: #8a2be2;">⚙️ Ajustes</div>
+            </div>
+            <div class="conteudo-scroll" style="padding: 15px;">
+                <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    <div style="font-size: 17px; font-weight: bold; margin-bottom: 15px; color: #8a2be2;">Configurações</div>
+                    <div style="display: flex; flex-direction: column;">
+                        <button id="btnBackup" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0; background: none; border: none; border-bottom: 1px solid #f0f0f0; text-align: left; font-size: 15px;">
+                            <span>💾 Backup dos Dados</span>
+                            <span style="color: #8a2be2;">→</span>
+                        </button>
+                        <button id="btnLimpar" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0; background: none; border: none; border-bottom: 1px solid #f0f0f0; text-align: left; font-size: 15px;">
+                            <span>🗑️ Limpar Todos os Dados</span>
+                            <span style="color: #8a2be2;">→</span>
+                        </button>
+                        <button id="btnInstalar" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0; background: none; border: none; text-align: left; font-size: 15px;">
+                            <span>📱 Instalar App</span>
+                            <span style="color: #8a2be2;">→</span>
+                        </button>
+                    </div>
+                </div>
+                <div style="text-align: center; color: #999; margin-top: 30px; font-size: 13px;">
+                    <p style="font-weight: bold;">Cashly v1.0</p>
+                    <p>App de controle financeiro</p>
+                </div>
+            </div>
+        </div>
+        <div class="menu-fixo" style="background: #f5f5f7;">
+            <div style="flex: 1; padding: 8px;"></div>
+            <div style="flex: 1; padding: 8px;"></div>
+            <div style="flex: 1; padding: 8px;"></div>
+        </div>
+    </div>
+
+    <!-- MODAL TRANSAÇÃO -->
+    <div id="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; padding: 15px; z-index: 2000;">
+        <div style="background: white; border-radius: 16px; width: 100%; max-width: 400px; max-height: 85vh; display: flex; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #e0e0e0;">
+                <div id="modalTitulo" style="font-size: 17px; font-weight: bold; color: #8a2be2;">Nova Renda</div>
+                <button id="btnFecharModal" style="background: none; border: none; font-size: 24px; color: #666; padding: 0; width: 40px; height: 40px;">×</button>
+            </div>
+            
+            <form id="formTransacao" class="scrollable" style="flex: 1; padding: 15px;">
+                <div style="margin-bottom: 15px;">
+                    <input type="text" id="inputNome" placeholder="Nome (ex: Salário, Mercado)" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <input type="number" id="inputValor" step="0.01" min="0" placeholder="Valor (R$)" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <div style="color: #555; margin-bottom: 10px; font-weight: 500; font-size: 14px;">Selecione um ícone:</div>
+                    <div id="iconesContainer" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px;"></div>
+                </div>
+                
+                <!-- CHECKBOX APENAS PARA GASTOS -->
+                <div id="divFixo" style="margin-bottom: 20px; display: none;">
+                    <label style="display: flex; align-items: center; gap: 10px; font-size: 15px;">
+                        <input type="checkbox" id="inputFixo" style="width: 18px; height: 18px;">
+                        <span>Despesa fixa mensal</span>
+                    </label>
+                </div>
+                
+                <!-- ID OCULTO PARA EDIÇÃO -->
+                <input type="hidden" id="inputId" value="">
+                
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button type="button" id="btnCancelarModal" style="flex: 1; padding: 14px; background: #f0f0f0; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; color: #666;">Cancelar</button>
+                    <button type="submit" id="btnSalvarModal" style="flex: 1; padding: 14px; background: #8a2be2; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; color: white;">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SELEÇÃO DE MÊS -->
+    <div id="modalMes" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; padding: 15px; z-index: 2001;">
+        <div style="background: white; border-radius: 16px; width: 100%; max-width: 300px; padding: 20px;">
+            <h3 style="color: #8a2be2; margin-bottom: 20px; text-align: center; font-size: 17px;">Selecionar Mês</h3>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #555; margin-bottom: 8px; font-size: 14px;">Mês:</label>
+                <select id="selectMes" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; background: white;">
+                    <option value="0">Janeiro</option>
+                    <option value="1">Fevereiro</option>
+                    <option value="2">Março</option>
+                    <option value="3">Abril</option>
+                    <option value="4">Maio</option>
+                    <option value="5">Junho</option>
+                    <option value="6">Julho</option>
+                    <option value="7">Agosto</option>
+                    <option value="8">Setembro</option>
+                    <option value="9">Outubro</option>
+                    <option value="10">Novembro</option>
+                    <option value="11">Dezembro</option>
+                </select>
+            </div>
+            
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; color: #555; margin-bottom: 8px; font-size: 14px;">Ano:</label>
+                <select id="selectAno" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; background: white;">
+                    <!-- Anos serão gerados por JavaScript -->
+                </select>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <button id="btnCancelarMes" style="flex: 1; padding: 12px; background: #f0f0f0; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; color: #666;">Cancelar</button>
+                <button id="btnSalvarMes" style="flex: 1; padding: 12px; background: #8a2be2; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; color: white;">Aplicar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
